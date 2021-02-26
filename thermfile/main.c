@@ -18,7 +18,7 @@
 */
 
 bool readFile(FILE*, FILE*);
-void writeFile(FILE*, FILE*);
+void writeFile(FILE*, FILE*, char*);
 
 int main(int argc, char** argv) {
 	//check for required arguments
@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 		}
 	}
 	else
-		writeFile(device, file);
+		writeFile(device, file, argc >= 4 ? argv[3] : 0);
 	
 	//close file handles and exit
 	fclose(file);
