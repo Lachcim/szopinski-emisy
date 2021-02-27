@@ -6,6 +6,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-bool readFile(FILE* reader, FILE* output) {
-	return false;
+void readFile(FILE* reader, FILE* output) {
+	
 }

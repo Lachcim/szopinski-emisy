@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-
 /*
 	THERMFILE
 	This is a command line utility for reading and writing files
@@ -17,7 +13,11 @@
 		thermfile write <device> <file>
 */
 
-bool readFile(FILE*, FILE*);
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+
+void readFile(FILE*, FILE*);
 void writeFile(FILE*, FILE*, char*);
 
 int main(int argc, char** argv) {
@@ -51,19 +51,11 @@ int main(int argc, char** argv) {
 		}
 	}
 	
-	//perform read or write, handle read error
-	int errorCode = 0;
-	if (readMode) {
-		if (!readFile(device, file)) {
-			fputs("Read error.\n", stderr);
-			errorCode = 4;
-		}
-	}
-	else
-		writeFile(device, file, argc >= 4 ? argv[3] : 0);
+	//perform read or write
+	if (readMode) readFile(device, file);
+	else writeFile(device, file, argc >= 4 ? argv[3] : 0);
 	
 	//close file handles and exit
 	fclose(file);
 	fclose(device);
-	return errorCode;
 }
