@@ -11,11 +11,30 @@ static const char* const BLACK = "\xDB\xDB\xDB\xDB";
 static const char* const WHITE = "    ";
 
 void printBits(char byte, FILE* printer) {
+	//print each bit of byte starting from MSB
 	for (int i = 0; i < 8; i++) {
-		char bit = byte & 0x80;
-		fputs(bit ? BLACK : WHITE, printer);
+		fputs(byte & 0x80 ? BLACK : WHITE, printer);
 		byte <<= 1;
 	}
+}
+void printReadable(char byte, bool start, FILE* printer) {
+	//return if not on the first line of entry
+	if (!start) {
+		fputs("  ", printer);
+		return;
+	}
+	
+	//print ASCII character or hexadecimal representation
+	if (byte >= 32 && byte < 127)
+		fprintf(printer, " %c", byte);
+	else
+		fprintf(printer, "%02hhX", byte);
+}
+void printSync(bool end, bool even, FILE* printer) {
+	//print control and synchronization patterns
+	fputs(end ? BLACK : WHITE, printer);
+	fputs(even ? BLACK : WHITE, printer);
+	fputs("\r\n", printer);
 }
 
 void writeFile(FILE* printer, FILE* input, char* filename) {
@@ -27,8 +46,8 @@ void writeFile(FILE* printer, FILE* input, char* filename) {
 	if (filename) fprintf(printer, "%s\r\n", filename);
 	
 	//print time
-	time_t printoutTime = time(0);
 	char timeBuf[64];
+	time_t printoutTime = time(0);
 	strftime(timeBuf, 64, "%Y-%m-%d %H:%M:%S", localtime(&printoutTime));
 	fputs(timeBuf, printer);
 	
@@ -40,39 +59,22 @@ void writeFile(FILE* printer, FILE* input, char* filename) {
 	bool even = true;
 	char byte = getc(input);
 	while (byte != EOF) {
-		//print bits of byte
-		printBits(byte, printer);
-
-		//print human readable representation
-		if (byte >= 32 && byte < 127)
-			fprintf(printer, " %c", byte);
-		else
-			fprintf(printer, "%02X", byte);
-			
-		//print sync code
-		fputs(WHITE, printer);
-		fputs(even ? BLACK : WHITE, printer);
-		fputs("\r\n", printer);
-		
-		//print second line of code
-		printBits(byte, printer);
-		fputs("  ", printer);
-		fputs(WHITE, printer);
-		fputs(even ? BLACK : WHITE, printer);
-		fputs("\r\n", printer);
+		for (int i = 0; i < 2; i++) {
+			printBits(byte, printer);
+			printReadable(byte, i == 0, printer);
+			printSync(false, even, printer);
+		}
 		
 		//read next character
-		even ^= 1;
+		even ^= true;
 		byte = getc(input);
 	}
 	
 	//print terminator
 	for (int i = 0; i < 2; i++) {
 		printBits(0, printer);
-		fputs("  ", printer);
-		fputs(BLACK, printer);
-		fputs(even ? BLACK : WHITE, printer);
-		fputs("\r\n", printer);
+		printReadable(0, false, printer);
+		printSync(true, even, printer);
 	}
 	
 	//add margin and cut paper
