@@ -28,7 +28,7 @@ void printReadable(char byte, bool start, FILE* printer) {
 	if (byte >= 32 && byte < 127)
 		fprintf(printer, " %c", byte);
 	else
-		fprintf(printer, "%02hhX", byte);
+		fprintf(printer, "%02hhX", byte & 0xFF); //reduce to 8 bits
 }
 void printSync(bool end, bool even, FILE* printer) {
 	//print control and synchronization patterns
@@ -57,7 +57,7 @@ void writeFile(FILE* printer, FILE* input, char* filename) {
 		
 	//print binary data
 	bool even = true;
-	char byte = getc(input);
+	int byte = getc(input);
 	while (byte != EOF) {
 		for (int i = 0; i < 2; i++) {
 			printBits(byte, printer);
