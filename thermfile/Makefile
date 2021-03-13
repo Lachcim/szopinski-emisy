@@ -2,10 +2,10 @@ src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
 thermfile: $(obj)
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -m32 -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 	
 %.o: %.c
-	$(CC) -c $(CFLAGS) $^ -m32 -o $@
+	$(CC) -c $(CFLAGS) $^ -o $@
 
 .PHONY: clean
 clean:
