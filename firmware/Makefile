@@ -1,12 +1,11 @@
 PROG ?= usbasp
 
 SRC = $(wildcard *.c)
-OBJ = $(SRC:.c=.o)
 
-main.hex: $(OBJ)
+main.hex: main.o
 	avr-objcopy -O ihex -R .eeprom $< $@
 	
-%.o: %.c
+main.o: $(SRC)
 	avr-gcc -Wall -Os -mcall-prologues -mmcu=atmega328p $(SRC) -Wl,-gc-sections -Wl,-relax -o $@
 
 .PHONY: clean
