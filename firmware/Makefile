@@ -7,7 +7,7 @@ main.hex: $(OBJ)
 	avr-objcopy -O ihex -R .eeprom $< $@
 	
 %.o: %.c
-	avr-gcc -Wall -Os -mcall-prologues -mmcu=atmega328p $^ -Wl,-gc-sections -Wl,-relax -o $@
+	avr-gcc -Wall -Os -mcall-prologues -mmcu=atmega328p $(SRC) -Wl,-gc-sections -Wl,-relax -o $@
 
 .PHONY: clean
 clean:
