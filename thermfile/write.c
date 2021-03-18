@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <inttypes.h>
 #include <time.h>
 
 static const char* const BLACK = "\xDB\xDB\xDB\xDB";
@@ -69,7 +70,7 @@ void printHeader(FILE* printer, char* filename) {
 	for (int i = 0; i < 10; i++)
 		fputs("\r\n", printer);
 }
-void printLength(FILE* printer, unsigned long long length, bool* even) {
+void printLength(FILE* printer, size_t length, bool* even) {
 	//handle zero length
 	if (length == 0) {
 		printByte(printer, 0, "0L\x20\x20", *even);
@@ -81,7 +82,7 @@ void printLength(FILE* printer, unsigned long long length, bool* even) {
 	int bufPos = 0;
 	char* lengthBuf = malloc(128);
 	memset(lengthBuf, 0x20, 128);
-	int zero = sprintf(lengthBuf, "%lldL", length);
+	int zero = sprintf(lengthBuf, "%ldL", (unsigned long)length);
 	lengthBuf[zero] = 0x20;
 	
 	//print length bytes
@@ -113,12 +114,47 @@ void printTerminator(FILE* printer, bool even) {
 }
 
 void writeStream(FILE* printer, FILE* input, char* filename) {
+	//allocate buffer for data
+	char* buffer = malloc(256);
+	size_t bufSize = 256;
+	ptrdiff_t bufPos = 0;
 	
+	//read stream into buffer
+	int byte = getc(input);
+	while (byte != EOF) {
+		buffer[bufPos] = byte;
+		bufPos++;
+		
+		//reallocate buffer if needed
+		if (bufPos == bufSize) {
+			bufSize *= 2;
+			buffer = realloc(buffer, bufSize);
+		}
+		
+		byte = getc(input);
+	}
+	
+	//print header and length
+	bool even = true;
+	printHeader(printer, filename);
+	printLength(printer, bufPos, &even);
+	
+	//print binary data
+	for (int i = 0; i < bufPos; i++) {
+		printByte(printer, buffer[i], 0, even);
+		even ^= true;
+	}
+	
+	//finish printout
+	printTerminator(printer, even);
+	
+	//free stream buffer
+	free(buffer);
 }
 void writeFile(FILE* printer, FILE* input, char* filename) {
 	//obtain file length
 	fseek(input, 0, SEEK_END);
-	unsigned long long length = ftell(input);
+	size_t length = ftell(input);
 	fseek(input, 0, SEEK_SET);
 	
 	//for files with indeterminate length, execute stream writing routine
