@@ -23,6 +23,7 @@ void handleSession();
 
 void initialize();
 void checkInit();
+char readByte();
 
 extern volatile char error;
 

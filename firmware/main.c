@@ -7,6 +7,7 @@
 #define F_CPU 8000000UL
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "firmware.h"
@@ -51,6 +52,12 @@ void handleSession() {
 	initialize();
 	if (error) return;
 	
-	sendSerial('@');
+	while (true) {
+		char byte = readByte();
+		if (error) return;
+		
+		char buf[8];
+		int len = sprintf(buf, "%u\r\n", byte & 0xFF);
+		sendSerialAsync(buf, len);
+	}
 }
-
