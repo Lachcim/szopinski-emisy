@@ -6,6 +6,8 @@
 #ifndef FIRMWARE_H
 #define FIRMWARE_H
 
+#include <stddef.h>
+
 #define PHOTO_0 (PINB & (1 << PB0))
 #define PHOTO_1 (PIND & (1 << PD7))
 #define PHOTO_2 (PIND & (1 << PD6))
@@ -25,5 +27,6 @@ extern volatile int initState;
 
 void awaitSerial(char);
 void sendSerial(char);
+void sendSerialAsync(char*, size_t);
 
 #endif

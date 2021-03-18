@@ -22,8 +22,8 @@ int main() {
 	
 	//enable UART and configure for 9600 baud, 8-bit frame, 1 stop bit
 	UBRR0H = 0; UBRR0L = 51;
-	UCSR0B = (1 << RXEN0) | (1 << TXEN0);
-	UCSR0C = (3 << UCSZ00);
+	UCSR0B |= (1 << RXEN0) | (1 << TXEN0) | (1 << UDRIE0);
+	UCSR0C |= (3 << UCSZ00);
 	
 	//enable global interrupts
 	sei();
