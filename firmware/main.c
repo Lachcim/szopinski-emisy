@@ -7,7 +7,7 @@
 #define F_CPU 8000000UL
 
 #include <stdbool.h>
-#include <stdio.h>
+#include <string.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "firmware.h"
@@ -52,12 +52,33 @@ void handleSession() {
 	initialize();
 	if (error) return;
 	
+	//define serial buffer for asynchronous transmission
+	char serialBuffer[16];
+	
+	//read file length
+	uint64_t length = 0;
 	while (true) {
+		//read byte and append bits to length
 		char byte = readByte();
-		if (error) return;
+		length <<= 7;
+		length |= (byte & 0x7F);
 		
-		char buf[8];
-		int len = sprintf(buf, "%u\r\n", byte & 0xFF);
-		sendSerialAsync(buf, len);
+		//finish if MSB is set
+		if (byte & 0x80) break;
 	}
+	
+	//announce file length
+	serialBuffer[0] = 'L';
+	memcpy(&serialBuffer[1], &length, 8);
+	sendSerialAsync(serialBuffer, 9);
+	
+	//read binary data
+	serialBuffer[0] = 'D';
+	for (ptrdiff_t i = 0; i < length; i++) {
+		serialBuffer[1] = readByte();
+		sendSerialAsync(serialBuffer, 2);
+	}
+	
+	//send confirmation
+	sendSerial('F');
 }
