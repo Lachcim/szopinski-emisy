@@ -19,6 +19,8 @@
 #define PHOTO_CTRL (PINC & (1 << PC4))
 #define PHOTO_SYNC (PINC & (1 << PC5))
 
+void handleSession();
+
 void initialize();
 void checkInit();
 

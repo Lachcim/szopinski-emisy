@@ -30,23 +30,28 @@ int main() {
 	
 	//main loop
 	while (true) {
-		//handle error from previous failed iteration
+		//call session handling procedure
+		handleSession();
+		
+		//handle error from failed session
 		if (error) {
 			sendSerial('E');
 			sendSerial(error);
 			error = 0;
 		}
-		
-		//wait for start signal and send confirmation
-		awaitSerial('S');
-		sendSerial('C');
-		
-		//perform initialization: await sync signal
-		initialize();
-		if (error) continue;
-		
-		sendSerial('@');
 	}
+}
+
+void handleSession() {
+	//wait for start signal and send confirmation
+	awaitSerial('S');
+	sendSerial('C');
+	
+	//perform initialization: await sync signal
+	initialize();
+	if (error) return;
+	
+	sendSerial('@');
 }
 
 ISR(TIMER0_COMPA_vect) {
