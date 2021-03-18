@@ -54,7 +54,3 @@ void handleSession() {
 	sendSerial('@');
 }
 
-ISR(TIMER0_COMPA_vect) {
-	//update init state
-	if (initState) checkInit();
-}

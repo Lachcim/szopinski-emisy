@@ -4,11 +4,12 @@
 */
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include "firmware.h"
 
 #define INIT_TIMEOUT 10000
 
-volatile int initState;
+static volatile int initState;
 static int initTimeout;
 
 void initialize() {
@@ -16,7 +17,7 @@ void initialize() {
 	initState = 2;
 	initTimeout = INIT_TIMEOUT;
 	
-	while (initState != 0 && error == 0);
+	while (initState != 0);
 }
 
 void checkInit() {
@@ -33,4 +34,9 @@ void checkInit() {
 		initState--;
 	if (initState == 1 && PHOTO_SYNC)
 		initState--;
+}
+
+ISR(TIMER0_COMPA_vect) {
+	//update init state
+	if (initState) checkInit();
 }

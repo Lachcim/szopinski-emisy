@@ -25,7 +25,6 @@ void initialize();
 void checkInit();
 
 extern volatile char error;
-extern volatile int initState;
 
 void awaitSerial(char);
 void sendSerial(char);
