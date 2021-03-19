@@ -17,8 +17,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-void readFile(FILE*, FILE*);
-void writeFile(FILE*, FILE*, char*);
+char readFile(char*, FILE*);
+char writeFile(char*, FILE*, char*);
 
 int main(int argc, char** argv) {
 	//check for required arguments
@@ -34,28 +34,34 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	
-	//open device
-	FILE* device = fopen(argv[2], readMode ? "rb" : "wb");
-	if (device == 0) {
-		fputs("Failed to open the device.\n", stderr);
-		return 2;
-	}
-	
 	//open file, stdio by default
 	FILE* file = readMode ? stdout : stdin;
 	if (argc >= 4) {
 		file = fopen(argv[3], readMode ? "wb" : "rb");
 		if (file == 0) {
 			fputs("Failed to open the file.\n", stderr);
-			return 3;
+			return 2;
 		}
 	}
 	
 	//perform read or write
-	if (readMode) readFile(device, file);
-	else writeFile(device, file, argc >= 4 ? argv[3] : 0);
+	char error = 0;
+	if (readMode) {
+		error = readFile(argv[2], file);
+		
+		if (error == 3) fputs("Failed to open the device.\n", stderr);
+		else if (error == 'I') fputs("Initialization timeout.\n", stderr);
+		else if (error == 'R') fputs("Read timeout.\n", stderr);
+		else if (error == 'E') fputs("Emergency stop.\n", stderr);
+		else if (error == 'B') fputs("Insufficient throughput.\n", stderr);
+		else if (error) fprintf(stderr, "Read error %d.", error);
+	}
+	else {
+		error = writeFile(argv[2], file, argc >= 4 ? argv[3] : 0);
+		if (error) fputs("Failed to open the device.\n", stderr);
+	}
 	
-	//close file handles and exit
+	//close the file handle and exit
 	fclose(file);
-	fclose(device);
+	return error;
 }

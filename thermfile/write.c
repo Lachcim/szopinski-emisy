@@ -151,7 +151,11 @@ void writeStream(FILE* printer, FILE* input, char* filename) {
 	//free stream buffer
 	free(buffer);
 }
-void writeFile(FILE* printer, FILE* input, char* filename) {
+char writeFile(char* device, FILE* input, char* filename) {
+	//open device
+	FILE* printer = fopen(device, "wb");
+	if (printer == 0) return 3;
+	
 	//obtain file length
 	fseek(input, 0, SEEK_END);
 	size_t length = ftell(input);
@@ -160,7 +164,7 @@ void writeFile(FILE* printer, FILE* input, char* filename) {
 	//for files with indeterminate length, execute stream writing routine
 	if (length == 0) {
 		writeStream(printer, input, filename);
-		return;
+		return 0;
 	}
 	
 	//print header and obtained length
@@ -179,4 +183,6 @@ void writeFile(FILE* printer, FILE* input, char* filename) {
 	
 	//finish printout
 	printTerminator(printer, even);
+	fclose(printer);
+	return 0;
 }
