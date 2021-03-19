@@ -12,6 +12,36 @@ char readFile(char* reader, FILE* output) {
 	void* handle = openSerial(reader);
 	if (!handle) return 3;
 	
+	char error;
+	
+	//initialize reader
+	error = writeSerial(handle, 'S');
+	if (error) return error;
+	error = readSerial(handle, 'C');
+	if (error) return error;
+	
+	//obtain length
+	uint64_t length;
+	error = readSerial(handle, 'L');
+	if (error) return error;
+	error = readSerialString(handle, 8, (char*)&length);
+	if (error) return error;
+	
+	//read file
+	for (ptrdiff_t i = 0; i < length; i++) {
+		char byte;
+		error = readSerial(handle, 'D');
+		if (error) return error;
+		error = readSerialString(handle, 1, &byte);
+		if (error) return error;
+		
+		fputc(byte, output);
+	}
+	
+	//get confirmation
+	error = readSerial(handle, 'F');
+	if (error) return error;
+	
 	closeSerial(handle);
 	return 0;
 }
