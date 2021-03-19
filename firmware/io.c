@@ -7,9 +7,10 @@
 #include <stddef.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "firmware.h"
 
-static char* pos = NULL;
-static char* end = NULL;
+static char* volatile pos = NULL;
+static char* volatile end = NULL;
 
 void awaitSerial(char signal) {
 	//wait until the specified byte is received
@@ -20,12 +21,19 @@ void awaitSerial(char signal) {
 }
 
 void sendSerial(char signal) {
-	//wait until the USART data register is empty, then send the specified byte
+	//wait until data register is empty and async comms are over, then send byte
+	while (pos != NULL);
 	while (!(UCSR0A & (1 << UDRE0)));
 	UDR0 = signal;
 }
 
-void sendSerialAsync(char* data, size_t length) {
+void sendSerialAsync(char* data, size_t length) {	
+	//handle busy buffer
+	if (pos != NULL) {
+		error = 'B';
+		return;
+	}
+	
 	//disable serial interrupts
 	UCSR0B &= ~(1 << UDRIE0);
 	

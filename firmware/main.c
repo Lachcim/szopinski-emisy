@@ -77,8 +77,9 @@ void handleSession() {
 	for (ptrdiff_t i = 0; i < length; i++) {
 		serialBuffer[1] = readByte();
 		sendSerialAsync(serialBuffer, 2);
+		if (error) return;
 	}
 	
-	//send confirmation
+	//send confirmation, will wait for async comms to clear
 	sendSerial('F');
 }
