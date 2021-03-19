@@ -1,11 +1,17 @@
 /*
 *	READ.C
-*	Code for interfacing with the reader device.
+*	Generic code for interfacing with the reader device.
 */
 
-#include <stdbool.h>
 #include <stdio.h>
+#include <stdint.h>
+#include "thermfile.h"
 
-char readFile(FILE* reader, FILE* output) {
+char readFile(char* reader, FILE* output) {
+	//open serial handle
+	void* handle = openSerial(reader);
+	if (!handle) return 3;
+	
+	closeSerial(handle);
 	return 0;
 }

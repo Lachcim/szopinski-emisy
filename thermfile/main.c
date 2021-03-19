@@ -16,9 +16,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-
-char readFile(char*, FILE*);
-char writeFile(char*, FILE*, char*);
+#include "thermfile.h"
 
 int main(int argc, char** argv) {
 	//check for required arguments
@@ -50,6 +48,9 @@ int main(int argc, char** argv) {
 		error = readFile(argv[2], file);
 		
 		if (error == 3) fputs("Failed to open the device.\n", stderr);
+		else if (error == 4) fputs("Serial read timeout.\n", stderr);
+		else if (error == 5) fputs("Serial protocol violation.\n", stderr);
+		else if (error == 6) fputs("Serial write timeout.\n", stderr);
 		else if (error == 'I') fputs("Initialization timeout.\n", stderr);
 		else if (error == 'R') fputs("Read timeout.\n", stderr);
 		else if (error == 'E') fputs("Emergency stop.\n", stderr);
