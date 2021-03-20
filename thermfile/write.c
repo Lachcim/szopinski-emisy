@@ -140,8 +140,8 @@ void writeStream(FILE* printer, FILE* input, char* filename) {
 	printLength(printer, bufPos, &even);
 	
 	//print binary data
-	for (int i = 0; i < bufPos; i++) {
-		printByte(printer, buffer[i], 0, even);
+	for (ptrdiff_t i = 0; i < bufPos; i++) {
+		printByte(printer, buffer[i], NULL, even);
 		even ^= true;
 	}
 	
@@ -164,6 +164,7 @@ char writeFile(char* device, FILE* input, char* filename) {
 	//for files with indeterminate length, execute stream writing routine
 	if (length == 0) {
 		writeStream(printer, input, filename);
+		fclose(printer);
 		return 0;
 	}
 	
@@ -175,7 +176,7 @@ char writeFile(char* device, FILE* input, char* filename) {
 	//print binary data
 	int byte = getc(input);
 	while (byte != EOF) {
-		printByte(printer, byte, 0, even);
+		printByte(printer, byte, NULL, even);
 		
 		even ^= true;
 		byte = getc(input);
