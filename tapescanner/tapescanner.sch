@@ -388,17 +388,6 @@ Wire Wire Line
 Connection ~ 1700 4950
 Wire Wire Line
 	1700 4950 2200 4950
-$Comp
-L power:GND #PWR0104
-U 1 1 605F46FB
-P 1450 6200
-F 0 "#PWR0104" H 1450 5950 50  0001 C CNN
-F 1 "GND" V 1455 6072 50  0000 R CNN
-F 2 "" H 1450 6200 50  0001 C CNN
-F 3 "" H 1450 6200 50  0001 C CNN
-	1    1450 6200
-	0    1    1    0   
-$EndComp
 Connection ~ 5700 6200
 Wire Wire Line
 	5700 6200 6200 6200
@@ -423,7 +412,6 @@ Wire Wire Line
 Connection ~ 2200 6200
 Wire Wire Line
 	2200 6200 2700 6200
-Connection ~ 1700 6200
 Wire Wire Line
 	1700 6200 2200 6200
 $Comp
@@ -450,32 +438,8 @@ F 3 "" H 1450 4950 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	3700 5550 3950 5550
-$Comp
-L power:GND #PWR0101
-U 1 1 604C259B
-P 1450 6650
-F 0 "#PWR0101" H 1450 6400 50  0001 C CNN
-F 1 "GND" V 1455 6522 50  0000 R CNN
-F 2 "" H 1450 6650 50  0001 C CNN
-F 3 "" H 1450 6650 50  0001 C CNN
-	1    1450 6650
-	0    1    1    0   
-$EndComp
 Wire Wire Line
 	1450 4950 1700 4950
-Wire Wire Line
-	1450 6200 1700 6200
-$Comp
-L Sensor_Optical:TEPT4400 Q0
-U 1 1 604B7B85
-P 1600 5900
-F 0 "Q0" H 1790 5946 50  0000 L CNN
-F 1 "TEPT5600" H 1790 5855 50  0000 L CNN
-F 2 "LED_THT:LED_D3.0mm_Clear" H 2080 5760 50  0001 C CNN
-F 3 "https://www.vishay.com/docs/84768/tept5600.pdf" H 1600 5900 50  0001 C CNN
-	1    1600 5900
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	4950 6650 5950 6650
 Connection ~ 4950 6650
@@ -496,14 +460,11 @@ Wire Wire Line
 Connection ~ 2950 6650
 Wire Wire Line
 	1950 6650 2950 6650
-Connection ~ 1950 6650
 Wire Wire Line
 	1950 7500 2950 7500
 Connection ~ 1950 7500
 Wire Wire Line
 	1500 7500 1950 7500
-Wire Wire Line
-	1450 6650 1950 6650
 Wire Wire Line
 	6450 4750 6450 5550
 Wire Wire Line
@@ -637,8 +598,6 @@ NoConn ~ 9100 1650
 NoConn ~ 9100 1750
 NoConn ~ 9100 2450
 NoConn ~ 9100 3050
-NoConn ~ 9100 3450
-NoConn ~ 9100 3550
 NoConn ~ 7900 2850
 $Comp
 L power:GND #PWR0113
@@ -650,17 +609,6 @@ F 2 "" H 7900 3750 50  0001 C CNN
 F 3 "" H 7900 3750 50  0001 C CNN
 	1    7900 3750
 	1    0    0    -1  
-$EndComp
-$Comp
-L MCU_Microchip_ATmega:ATmega328P-PU U0
-U 1 1 607AED4A
-P 9700 2450
-F 0 "U0" H 9056 2404 50  0000 R CNN
-F 1 "ATmega328P-PU" H 9056 2495 50  0000 R CNN
-F 2 "Package_DIP:DIP-28_W7.62mm" H 9700 2450 50  0001 C CIN
-F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega328_P%20AVR%20MCU%20with%20picoPower%20Technology%20Data%20Sheet%2040001984A.pdf" H 9700 2450 50  0001 C CNN
-	1    9700 2450
-	-1   0    0    1   
 $EndComp
 Wire Wire Line
 	8500 3450 8400 3450
@@ -978,4 +926,191 @@ Wire Wire Line
 	5300 2150 5600 2150
 Wire Wire Line
 	5600 2250 5300 2250
+$Comp
+L MCU_Microchip_ATmega:ATmega328P-PU U0
+U 1 1 607AED4A
+P 9700 2450
+F 0 "U0" H 9056 2404 50  0000 R CNN
+F 1 "ATmega328P-PU" H 9056 2495 50  0000 R CNN
+F 2 "Package_DIP:DIP-28_W7.62mm" H 9700 2450 50  0001 C CIN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega328_P%20AVR%20MCU%20with%20picoPower%20Technology%20Data%20Sheet%2040001984A.pdf" H 9700 2450 50  0001 C CNN
+	1    9700 2450
+	-1   0    0    1   
+$EndComp
+Text Label 9100 3550 2    50   ~ 0
+READ_HEAD
+Text Label 9100 3450 2    50   ~ 0
+EMERGENCY
+$Comp
+L Transistor_BJT:MJE13007G Q10
+U 1 1 606AAE77
+P 1400 3550
+F 0 "Q10" V 1729 3550 50  0000 C CNN
+F 1 "MJE13007G" V 1638 3550 50  0000 C CNN
+F 2 "Package_TO_SOT_THT:TO-220-3_Vertical" H 1650 3475 50  0001 L CIN
+F 3 "http://www.onsemi.com/pub_link/Collateral/MJE13007-D.PDF" H 1400 3550 50  0001 L CNN
+	1    1400 3550
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 606B3702
+P 1600 3450
+F 0 "#PWR?" H 1600 3200 50  0001 C CNN
+F 1 "GND" V 1605 3322 50  0000 R CNN
+F 2 "" H 1600 3450 50  0001 C CNN
+F 3 "" H 1600 3450 50  0001 C CNN
+	1    1600 3450
+	0    -1   -1   0   
+$EndComp
+Connection ~ 1950 6650
+$Comp
+L Sensor_Optical:TEPT4400 Q0
+U 1 1 604B7B85
+P 1600 5900
+F 0 "Q0" H 1790 5946 50  0000 L CNN
+F 1 "TEPT5600" H 1790 5855 50  0000 L CNN
+F 2 "LED_THT:LED_D3.0mm_Clear" H 2080 5760 50  0001 C CNN
+F 3 "https://www.vishay.com/docs/84768/tept5600.pdf" H 1600 5900 50  0001 C CNN
+	1    1600 5900
+	1    0    0    -1  
+$EndComp
+Connection ~ 1700 6200
+Wire Wire Line
+	1200 3450 950  3450
+Wire Wire Line
+	950  6650 1950 6650
+Wire Wire Line
+	950  6200 1700 6200
+Wire Wire Line
+	950  6200 950  6650
+$Comp
+L Device:R R17
+U 1 1 606CF734
+P 1400 3900
+F 0 "R17" H 1470 3946 50  0000 L CNN
+F 1 "330R" H 1470 3855 50  0000 L CNN
+F 2 "" V 1330 3900 50  0001 C CNN
+F 3 "~" H 1400 3900 50  0001 C CNN
+	1    1400 3900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1400 4050 1400 4150
+Wire Wire Line
+	1400 4150 1650 4150
+Text Label 1650 4150 0    50   ~ 0
+READ_HEAD
+Wire Wire Line
+	950  2850 1500 2850
+$Comp
+L Motor:Motor_DC M0
+U 1 1 606DC4B7
+P 1800 2850
+F 0 "M0" V 1505 2800 50  0000 C CNN
+F 1 "Motor_DC" V 1596 2800 50  0000 C CNN
+F 2 "" H 1800 2760 50  0001 C CNN
+F 3 "~" H 1800 2760 50  0001 C CNN
+	1    1800 2850
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2000 2850 2250 2850
+Wire Wire Line
+	2250 2850 2250 2700
+Connection ~ 2250 2850
+Wire Wire Line
+	2250 2850 2550 2850
+$Comp
+L Device:C C1
+U 1 1 606EDAE3
+P 2250 2550
+F 0 "C1" H 2365 2596 50  0000 L CNN
+F 1 "470n" H 2365 2505 50  0000 L CNN
+F 2 "" H 2288 2400 50  0001 C CNN
+F 3 "~" H 2250 2550 50  0001 C CNN
+	1    2250 2550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 606EFFCB
+P 2250 2400
+F 0 "#PWR?" H 2250 2150 50  0001 C CNN
+F 1 "GND" H 2255 2227 50  0000 C CNN
+F 2 "" H 2250 2400 50  0001 C CNN
+F 3 "" H 2250 2400 50  0001 C CNN
+	1    2250 2400
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:+5V #PWR?
+U 1 1 606F04F9
+P 2550 2850
+F 0 "#PWR?" H 2550 2700 50  0001 C CNN
+F 1 "+5V" V 2565 2978 50  0000 L CNN
+F 2 "" H 2550 2850 50  0001 C CNN
+F 3 "" H 2550 2850 50  0001 C CNN
+	1    2550 2850
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	950  3450 950  6200
+Connection ~ 950  6200
+Wire Wire Line
+	950  2850 950  3450
+Connection ~ 950  3450
+$Comp
+L Switch:SW_Push SW0
+U 1 1 60725EDE
+P 1400 1850
+F 0 "SW0" H 1400 2135 50  0000 C CNN
+F 1 "SW_Push" H 1400 2044 50  0000 C CNN
+F 2 "" H 1400 2050 50  0001 C CNN
+F 3 "~" H 1400 2050 50  0001 C CNN
+	1    1400 1850
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR?
+U 1 1 60727D38
+P 1200 1850
+F 0 "#PWR?" H 1200 1700 50  0001 C CNN
+F 1 "+5V" V 1215 1978 50  0000 L CNN
+F 2 "" H 1200 1850 50  0001 C CNN
+F 3 "" H 1200 1850 50  0001 C CNN
+	1    1200 1850
+	0    -1   -1   0   
+$EndComp
+Text Label 2400 1850 0    50   ~ 0
+EMERGENCY
+$Comp
+L Device:R R18
+U 1 1 60739369
+P 1950 1450
+F 0 "R18" H 2020 1496 50  0000 L CNN
+F 1 "10K" H 2020 1405 50  0000 L CNN
+F 2 "" V 1880 1450 50  0001 C CNN
+F 3 "~" H 1950 1450 50  0001 C CNN
+	1    1950 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 6073B5AB
+P 1950 1300
+F 0 "#PWR?" H 1950 1050 50  0001 C CNN
+F 1 "GND" H 1955 1127 50  0000 C CNN
+F 2 "" H 1950 1300 50  0001 C CNN
+F 3 "" H 1950 1300 50  0001 C CNN
+	1    1950 1300
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1600 1850 1950 1850
+Wire Wire Line
+	1950 1600 1950 1850
+Connection ~ 1950 1850
+Wire Wire Line
+	1950 1850 2400 1850
 $EndSCHEMATC
