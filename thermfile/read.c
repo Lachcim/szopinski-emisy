@@ -22,8 +22,10 @@ char readFile(char* reader, FILE* output) {
 	
 	//obtain length
 	uint64_t length;
+	setLongTimeout(handle, true);
 	error = readSerial(handle, 'L');
 	if (error) return error;
+	setLongTimeout(handle, false);
 	error = readSerialString(handle, 8, (char*)&length);
 	if (error) return error;
 	

@@ -6,6 +6,8 @@
 #ifdef _WIN32
 
 #include <windows.h>
+#include <stdbool.h>
+#include "thermfile.h"
 
 void* openSerial(char* device) {
 	//obtain handle to serial port
@@ -19,13 +21,6 @@ void* openSerial(char* device) {
 	if (reader == INVALID_HANDLE_VALUE)
 		return 0;
 	
-	//set timeout values
-	COMMTIMEOUTS timeouts = {0};
-	timeouts.ReadIntervalTimeout = 100;
-	timeouts.ReadTotalTimeoutConstant = 11000;
-	timeouts.WriteTotalTimeoutConstant = 100;
-	SetCommTimeouts(reader, &timeouts);
-	
 	//set serial parameters
 	DCB state;
 	state.DCBlength = sizeof(DCB);
@@ -35,10 +30,22 @@ void* openSerial(char* device) {
 	state.StopBits = ONESTOPBIT;
 	SetCommState(reader, &state);
 	
+	//configure timeouts
+	setLongTimeout(&reader, false);
+	
 	//allocate handle on the heap
 	HANDLE* handle = malloc(sizeof(HANDLE));
 	*handle = reader;
 	return handle;
+}
+
+void setLongTimeout(void* handle, bool longTimeout) {
+	//set timeout values
+	COMMTIMEOUTS timeouts = {0};
+	timeouts.ReadIntervalTimeout = 100;
+	timeouts.ReadTotalTimeoutConstant = longTimeout ? 10500 : 100;
+	timeouts.WriteTotalTimeoutConstant = 100;
+	SetCommTimeouts(*(HANDLE*)handle, &timeouts);
 }
 
 char readSerial(void* handle, char symbol) {
