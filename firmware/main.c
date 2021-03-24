@@ -4,8 +4,6 @@
 	main loop.
 */
 
-#define F_CPU 8000000UL
-
 #include <stdbool.h>
 #include <string.h>
 #include <avr/io.h>
@@ -15,6 +13,9 @@
 volatile char error = 0;
 
 int main() {
+	//set read head pin as output
+	DDRB |= READ_HEAD_PIN;
+	
 	//set timer to CTC mode, /64, clear on 124 (every 1ms), enable interrupt
 	TCCR0A |= (1 << WGM01);
 	TCCR0B |= (3 << CS00);
@@ -34,6 +35,9 @@ int main() {
 		//call session handling procedure
 		handleSession();
 		
+		//disable read head after session
+		PORTB &= ~READ_HEAD_PIN;
+		
 		//handle error from failed session
 		if (error) {
 			sendSerial('E');
@@ -47,6 +51,9 @@ void handleSession() {
 	//wait for start signal and send confirmation
 	awaitSerial('S');
 	sendSerial('C');
+	
+	//enable read head
+	PORTB |= READ_HEAD_PIN;
 	
 	//perform initialization: await sync signal
 	initialize();
