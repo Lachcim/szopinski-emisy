@@ -6,6 +6,7 @@
 #ifndef FIRMWARE_H
 #define FIRMWARE_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #define PHOTO_0 (PINB & (1 << PB0))
@@ -20,6 +21,7 @@
 #define PHOTO_SYNC (PINC & (1 << PC5))
 
 #define READ_HEAD_PIN (1 << PB1)
+#define EMERGENCY (PINB & (1 << PC2))
 
 void handleSession();
 
@@ -28,6 +30,7 @@ void checkInit();
 char readByte();
 
 extern volatile char error;
+extern bool inSession;
 
 void awaitSerial(char);
 void sendSerial(char);

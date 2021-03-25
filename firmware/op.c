@@ -24,7 +24,7 @@ void initialize() {
 	initState = 2;
 	initTimeout = INIT_TIMEOUT;
 	
-	while (initState != 0);
+	while (initState != 0 && !error);
 }
 
 void checkInit() {
@@ -56,7 +56,7 @@ char readByte() {
 	readProbeTimeout = 1;
 	
 	//wait until readout is finished
-	while (readTimeout != 0);
+	while (readTimeout != 0 && !error);
 	if (error) return 0;
 	
 	//parse voting result
@@ -111,4 +111,8 @@ ISR(TIMER0_COMPA_vect) {
 	//update init and read
 	if (initState) checkInit();
 	if (readTimeout) checkRead();
+}
+ISR(PCINT0_vect) {
+	//trigger emergency error
+	if (inSession && EMERGENCY) error = 'E';
 }

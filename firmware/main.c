@@ -11,10 +11,15 @@
 #include "firmware.h"
 
 volatile char error = 0;
+bool inSession = false;
 
 int main() {
 	//set read head pin as output
 	DDRB |= READ_HEAD_PIN;
+	
+	//enable interrupts on emergency button pin
+	PCICR |= (1 << PCIE0);
+	PCMSK0 |= (1 << PCINT2);
 	
 	//set timer to CTC mode, /64, clear on 124 (every 1ms), enable interrupt
 	TCCR0A |= (1 << WGM01);
@@ -36,6 +41,7 @@ int main() {
 		handleSession();
 		
 		//disable read head after session
+		inSession = false;
 		PORTB &= ~READ_HEAD_PIN;
 		
 		//handle error from failed session
@@ -52,7 +58,8 @@ void handleSession() {
 	awaitSerial('S');
 	sendSerial('C');
 	
-	//enable read head
+	//start session and enable read head
+	inSession = true;
 	PORTB |= READ_HEAD_PIN;
 	
 	//perform initialization: await sync signal
