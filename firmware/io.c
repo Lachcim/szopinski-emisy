@@ -9,15 +9,14 @@
 #include <avr/interrupt.h>
 #include "firmware.h"
 
+static volatile short receiveBuffer = -1;
 static char* volatile pos = NULL;
 static char* volatile end = NULL;
 
 void awaitSerial(char signal) {
 	//wait until the specified byte is received
-	while (true) {
-		while (!(UCSR0A & (1 << RXC0)));
-		if (UDR0 == signal) return;
-	}
+	while (receiveBuffer != (unsigned char)signal);
+	receiveBuffer = -1;
 }
 
 void sendSerial(char signal) {
@@ -57,4 +56,11 @@ ISR(USART_UDRE_vect) {
 	//mark transmission as finished
 	if (pos == end)
 		pos = NULL;
+}
+ISR(USART_RX_vect) {
+	//update receive buffer
+	receiveBuffer = UDR0;
+	
+	//handle emergency
+	if (inSession && receiveBuffer == 'X') error = 'E';
 }
