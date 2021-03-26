@@ -7,19 +7,25 @@
 #include <avr/interrupt.h>
 #include "firmware.h"
 
-#define INIT_TIMEOUT 10000
+#define INIT_DELAY 50
+#define INIT_TIMEOUT 9950
 #define READ_TIMEOUT 80
 #define PROBE_TIMEOUT 1
 
-static volatile int initState;
+static volatile int initState = 0;
 static int initTimeout;
 
-static volatile int readTimeout;
+static volatile int readTimeout = 0;
 static int readProbeTimeout;
 static char readSync;
 static int readPoll[9];
 
+static volatile int waitTimeout = 0;
+
 void initialize() {
+	//wait for LEDs to come on
+	wait(INIT_DELAY);
+	
 	//reset init state and await initialization
 	initState = 2;
 	initTimeout = INIT_TIMEOUT;
@@ -107,10 +113,19 @@ void checkRead() {
 	readProbeTimeout = PROBE_TIMEOUT;
 }
 
+void wait(int amount) {
+	//wait for the specified number of milliseconds
+	waitTimeout = amount;
+	while (waitTimeout && !error);
+}
+
 ISR(TIMER0_COMPA_vect) {
 	//update init and read
 	if (initState) checkInit();
 	if (readTimeout) checkRead();
+	
+	//decrement wait timeout
+	if (waitTimeout) waitTimeout--;
 }
 ISR(PCINT0_vect) {
 	//trigger emergency error

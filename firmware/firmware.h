@@ -28,6 +28,7 @@ void handleSession();
 void initialize();
 void checkInit();
 char readByte();
+void wait(int);
 
 extern volatile char error;
 extern bool inSession;
