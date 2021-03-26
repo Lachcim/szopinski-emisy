@@ -74,6 +74,8 @@ void handleSession() {
 	while (true) {
 		//read byte and append bits to length
 		char byte = readByte();
+		if (error) return;
+		
 		length <<= 7;
 		length |= (byte & 0x7F);
 		
@@ -85,11 +87,14 @@ void handleSession() {
 	serialBuffer[0] = 'L';
 	memcpy(&serialBuffer[1], &length, 8);
 	sendSerialAsync(serialBuffer, 9);
+	if (error) return;
 	
 	//read binary data
 	serialBuffer[0] = 'D';
 	for (ptrdiff_t i = 0; i < length; i++) {
 		serialBuffer[1] = readByte();
+		if (error) return;
+		
 		sendSerialAsync(serialBuffer, 2);
 		if (error) return;
 	}
