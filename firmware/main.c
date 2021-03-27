@@ -71,7 +71,7 @@ void handleSession() {
 	
 	//read file length
 	uint64_t length = 0;
-	for (int offset = 0; offset < 64; offset += 7) {
+	for (int offset = 0; true; offset += 7) {
 		//read byte and append bits to length
 		char byte = readByte();
 		if (error) return;
