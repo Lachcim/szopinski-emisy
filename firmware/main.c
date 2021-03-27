@@ -71,13 +71,12 @@ void handleSession() {
 	
 	//read file length
 	uint64_t length = 0;
-	while (true) {
+	for (int offset = 0; offset < 64; offset += 7) {
 		//read byte and append bits to length
 		char byte = readByte();
 		if (error) return;
 		
-		length <<= 7;
-		length |= (byte & 0x7F);
+		length |= (byte & 0x7F) << offset;
 		
 		//finish if MSB is set
 		if (byte & 0x80) break;
