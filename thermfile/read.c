@@ -41,6 +41,7 @@ char readFile(char* reader, FILE* output) {
 	}
 	
 	//get confirmation
+	setLongTimeout(handle, true);
 	error = readSerial(handle, 'F');
 	if (error) return error;
 	

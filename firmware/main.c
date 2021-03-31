@@ -98,6 +98,9 @@ void handleSession() {
 		if (error) return;
 	}
 	
-	//send confirmation, will wait for async comms to clear
+	//move paper from under the roller
+	wait(350);
+	
+	//send confirmation
 	sendSerial('F');
 }
