@@ -10,7 +10,7 @@
 #define INIT_DELAY 50
 #define INIT_TIMEOUT 9950
 #define READ_TIMEOUT 80
-#define PROBE_TIMEOUT 1
+#define PROBE_TIMEOUT 2
 
 static volatile int initState = 0;
 static int initTimeout;
