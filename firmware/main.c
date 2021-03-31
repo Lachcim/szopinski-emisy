@@ -27,6 +27,10 @@ int main() {
 	OCR0A = 124;
 	TIMSK0 |= (1 << OCIE0A);
 	
+	//configure ADC to AVcc as reference, input pin 5, enable free running mode
+	ADMUX |= (1 << MUX0) | (1 << MUX2) | (1 << REFS0);
+	ADCSRA |= (1 << ADATE);
+	
 	//enable UART and configure for 9600 baud, 8-bit frame, 1 stop bit
 	UBRR0H = 0; UBRR0L = 51;
 	UCSR0B |= (1 << RXEN0) | (1 << TXEN0) | (1 << UDRIE0) | (1 << RXCIE0);
@@ -40,9 +44,10 @@ int main() {
 		//call session handling procedure
 		handleSession();
 		
-		//disable read head after session
+		//disable read head and ADC after session
 		inSession = false;
 		PORTB &= ~READ_HEAD_PIN;
+		ADCSRA &= ~(1 << ADEN);
 		
 		//handle error from failed session
 		if (error) {
@@ -58,9 +63,10 @@ void handleSession() {
 	awaitSerial('S');
 	sendSerial('C');
 	
-	//start session and enable read head
+	//start session, enable read head and ADC
 	inSession = true;
 	PORTB |= READ_HEAD_PIN;
+	ADCSRA |= (1 << ADEN) | (1 << ADSC);
 	
 	//perform initialization: await sync signal
 	initialize();

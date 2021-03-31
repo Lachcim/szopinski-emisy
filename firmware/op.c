@@ -10,15 +10,14 @@
 #define INIT_DELAY 50
 #define INIT_TIMEOUT 9950
 #define READ_TIMEOUT 80
-#define PROBE_TIMEOUT 2
 
 static volatile int initState = 0;
 static int initTimeout;
 
 static volatile int readTimeout = 0;
-static int readProbeTimeout;
 static char readSync;
-static int readPoll[9];
+static char bestResult;
+static int bestSync;
 
 static volatile int waitTimeout = 0;
 
@@ -50,33 +49,17 @@ void checkInit() {
 }
 
 char readByte() {
-	//reset read poll
-	for (int i = 0; i < 9; i++)
-		readPoll[i] = 0;
-		
-	//remember sync value of this symbol
+	//reset read state
 	readSync = PHOTO_SYNC;
-	
-	//set timeouts
+	bestSync = readSync ? 0 : 1024;
 	readTimeout = READ_TIMEOUT;
-	readProbeTimeout = 1;
 	
 	//wait until readout is finished
 	while (readTimeout != 0 && !error);
 	if (error) return 0;
 	
-	//parse voting result
-	char result = 0;
-	for (int i = 0; i < 8; i++) {
-		result <<= 1;
-		result |= readPoll[i] > 0;
-	}
-	
-	//invert result if ctrl is high
-	if (readPoll[8] > 0)
-		result = ~result;
-	
-	return result;
+	//return best probed value
+	return bestResult;
 }
 
 void checkRead() {
@@ -93,24 +76,37 @@ void checkRead() {
 		return;
 	}
 	
-	//wait for voting time
-	readProbeTimeout--;
-	if (readProbeTimeout != 0)
-		return;
+	//probe intensity of sync signal
+	int syncValue = ADCL;
+	syncValue |= ((int)ADCH << 8);
 	
-	//collect votes
-	char readout[] = {
-		PHOTO_0, PHOTO_1, PHOTO_2,
-		PHOTO_3, PHOTO_4, PHOTO_5,
-		PHOTO_6, PHOTO_7, PHOTO_CTRL
-	};
+	//remember best result
+	bool isBest = readSync && syncValue > bestSync;
+	isBest |= !readSync && syncValue < bestSync;
 	
-	//cast votes
-	for (int i = 0; i < 9; i++)
-		readPoll[i] += readout[i] ? 1 : -1;
-	
-	//reset probe timeout
-	readProbeTimeout = PROBE_TIMEOUT;
+	if (isBest) {
+		//collect bits
+		char readout[] = {
+			PHOTO_0, PHOTO_1, PHOTO_2,
+			PHOTO_3, PHOTO_4, PHOTO_5,
+			PHOTO_6, PHOTO_7, PHOTO_CTRL
+		};
+		
+		//build result
+		char result = 0;
+		for (int i = 0; i < 8; i++) {
+			result <<= 1;
+			result |= (bool)readout[i];
+		}
+		
+		//invert result if ctrl is high
+		if (readout[8])
+			result = ~result;
+		
+		//save result
+		bestResult = result;
+		syncValue = bestSync;	
+	}
 }
 
 void wait(int amount) {
