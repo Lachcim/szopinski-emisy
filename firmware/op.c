@@ -59,7 +59,7 @@ char readByte() {
 	if (error) return 0;
 	
 	//return mid-symbol result
-	return readHistory[readHistorySize >> 1];
+	return readHistory[(readHistorySize * 11) >> 4];
 }
 
 void checkRead() {
