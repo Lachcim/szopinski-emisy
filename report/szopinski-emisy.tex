@@ -2,6 +2,7 @@
 
 \usepackage{graphicx}
 \usepackage{pdflscape}
+\usepackage[pass]{geometry}
 \setlength{\parskip}{1em}
 
 \begin{document}
@@ -26,6 +27,20 @@
 	Described in this document are the engineering challenges faced during the
 	construction of the machine as well as detailed descriptions of their
 	solutions. The project was successfully completed using real hardware.
+	
+	\newpage
+	\newgeometry{left=2.5cm,right=2.5cm}
+	
+	\hspace{0cm}
+	\vfill
+	\begin{figure}[h]		
+		\includegraphics[width=\linewidth]{img/device}
+		\caption{A photo of the device.}
+	\end{figure}
+	\vfill
+	\hspace{0cm}
+	
+	\restoregeometry
 	
 	\newpage
 	\renewcommand{\baselinestretch}{0}\normalsize
@@ -54,6 +69,7 @@
 	program is outside the scope of this document.
 	
 	\subsection{Description of the data format}
+	\label{sec:format}
 	
 	Below is an illustration showing an example data tape with an explanation
 	of its characteristic features. As the device pulls the tape through the
@@ -100,9 +116,9 @@
 	Figure~\ref{fig:vertical} shows the vertical layout of symbols on the tape.
 	Each printout begins with a large blank area on which human-readable
 	metadata is printed for convenience. This area allows the user to push the
-	tape through the read head chamber to be taken up by the roller.
-	It also participates in the two-step read initialization process discussed
-	in section~\ref{sec:software}.
+	tape through the read head chamber, past which it can be taken up by the
+	roller. It also participates in the two-step read initialization process
+	discussed in section~\ref{sec:software}.
 	
 	As a simple error detection measure, the device is informed about the
 	length of the incoming data in advance. This information is carried by the
@@ -122,20 +138,21 @@
 	Having no hardware resources required for independent operation, the device
 	is granted very little autonomy in terms of its work cycle. The only
 	physical control present on its body is the emergency stop button --
-	otherwise, session initialization, session halting, and data collection are
-	all governed by the host computer.
+	otherwise, session initialization and data collection are both governed by
+	the host computer.
 	
 	A simple communication protocol is used to exchange data and status
 	messages with the \texttt{thermfile} utility running on the computer. Each
-	packet begins with a single byte identifying the type of the message and a
-	fixed-size payload. The messages enter and leave the microcontroller
-	through UART. USB communication is handled by specialized hardware and
-	software.
+	packet begins with a single byte identifying the type of the message
+	followed by a fixed-size payload. The messages enter and leave the
+	microcontroller through UART. USB communication is handled by specialized
+	hardware and software.
 	
+	\newpage
 	\subsubsection{Table of messages}
 	
 	\begin{center}
-		\begin{tabular}{ |c|c|p{7cm}|c| }
+	\begin{tabular}{ |c|c|p{7cm}|c| }
 		\hline
 			Code & Direction & Meaning & Payload \\
 		\hline
@@ -186,7 +203,7 @@
 			device responds with an error code.
 			& 0 \\
 		\hline
-		\end{tabular}
+	\end{tabular}
 	\end{center}
 	
 	\subsubsection{Table of error codes}
@@ -217,5 +234,93 @@
 		\hline
 		\end{tabular}
 	\end{center}
+	
+	\section{Hardware implementation}
+	
+	\subsection{Choice of microcontroller}
+	
+	At the heart of the system lies the ATmega328P, a microcontroller from the
+	8-bit AVR family of MCUs formerly manufactured by Atmel. This chip was
+	chosen based on the following considerations:
+	\begin{enumerate}
+		\item The vast ubiquity and popularity of the chip which ensure the
+		availability of up-to-date documentation and other text resources.
+		\item The availability of a well-established, modern and open-source
+		programming environment in the form of \texttt{avr-gcc},
+		\texttt{avrdude} and USBasp.
+		\item The presence of an in-system programming feature which makes
+		rapid prototyping possible.
+		\item A dual in-line package variant which enables the chip to be
+		placed on a breadboard.
+		\item 23 general-purpose I/O pins, 18 of which are utilized by the
+		device.
+		\item 2 kilobytes of RAM and 32 kilobytes of program memory provided a
+		wide margin of error before the exact requirements were known.
+	\end{enumerate}
+	
+	A chip from the Intel 8051 family was also briefly considered, but it was
+	ultimately rejected due to a lack of a modern open-source environment.
+	
+	It is now known that a lower-spec ATmega chip such as the ATmega48A is also
+	suitable. The ATtiny2313A is a valid candidate as well.
+	
+	\subsection{General overview of the system}
+	
+	As described in section~\ref{sec:format}, the device scans the paper tape
+	from top to bottom and decodes the symbols printed therein. This involves
+	putting the tape into linear motion and periodically probing the light
+	intensity of each of the 10 tracks until all the symbols have been scanned.
+	
+	\begin{figure}[h]
+		\begin{center}
+			\includegraphics[width=0.75\linewidth]{img/topview}
+			\caption{The device as seen from above.}
+			\label{fig:topview}
+		\end{center}
+	\end{figure}
+	
+	Figure~\ref{fig:topview} shows the top view of the device. Linear motion is
+	achieved by pulling the tape through an 80-millimeter-wide trough, which
+	ensures that the tracks do not become misaligned with the read head. A DC
+	motor coupled with a rubber-coated roller pulls the tape as it passes under
+	the head.
+	
+	\newpage
+	
+	Suspended above the tape is the read head itself. It consists of 10
+	phototransistors aligned with each of the tracks, as well as 5
+	light-emitting diodes to provide controllable light conditions. The
+	transistors are protected from overexposure by a layer of silicone coating
+	from above and a heat shrink tube wrapped around the lens.
+	
+	\begin{figure}[h]
+		\begin{center}
+			\includegraphics[width=0.75\linewidth]{img/readhead}
+			\caption{The front face of the read head.}
+			\label{fig:readhead}
+		\end{center}
+	\end{figure}
+	
+	To further protect the sensors from interference from outside light
+	sources, the read head is enclosed within a dark chamber. The tape enters
+	the chamber through a slit where the walls meet the trough. The slit also
+	keeps the paper flush with the bottom of the trough.
+	
+	USB communication, being outside the scope of the project itself, is
+	outsourced to an FT232 chip which emulates ordinary RS-232 communication
+	over the Universal Serial Bus. The device appears as a serial port
+	connection to the host computer. Because the FT232 chip does not come in a
+	dual in-line package, a separate PCB is mounted alongside the breadboard.
+	
+	Being a peripheral device meant to be paired with a desktop computer, the
+	reader has no external power source other than the USB port. The FT232 chip
+	is configured to permit a maximum current of 500 mA, which is sufficient to
+	power the motor even when it is stalled. The current consumed by the LEDs
+	is very low (around 20 mA).
+	
+	The remaining two user-facing features of the device are the emergency stop
+	button and the power LED. The button may be pressed to immediately halt a
+	read session. The power LED is placed between the power rail and the ground
+	rail to indicate that the device is powered on.
 	
 \end{document}
