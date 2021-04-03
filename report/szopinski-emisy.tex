@@ -3,6 +3,9 @@
 \usepackage{graphicx}
 \usepackage{pdflscape}
 \usepackage[pass]{geometry}
+\usepackage{pdfpages}
+\usepackage{textgreek}
+\usepackage{hyperref}
 \setlength{\parskip}{1em}
 
 \begin{document}
@@ -322,5 +325,110 @@
 	button and the power LED. The button may be pressed to immediately halt a
 	read session. The power LED is placed between the power rail and the ground
 	rail to indicate that the device is powered on.
+	
+	\subsection{Detailed discussion}
+	
+	Below is a schematic fully describing the circuit comprised by the device.
+	
+	\subsubsection{Microcontroller setup}
+	
+	The microcontroller is connected to the power rail through a 100 nF
+	decoupling capacitor. The power is supplied from the FT232 breakout board,
+	which itself also contains circuitry needed to eliminate noise from the
+	USB cable. The $AV_{cc}$ pin, while connected, does not require a
+	decoupling capacitor because the analog to digital converter is not
+	utilized.
+	
+	To simplify the circuit, no external crystal oscillator is connected to the
+	XTAL pins. With the clock prescaler set to 1, the internal RC oscillator
+	drives the CPU at 8 MHz, which gives it sufficient computing power to
+	perform its tasks in a timely manner.
+	
+	The $\overline{RESET}$ pin is pulled high through a 10 k\textOmega {}
+	pull-up resistor, preventing the controller from resetting. It may be
+	driven low by an ISP programmer to force the microcontroller into
+	programming mode. The MISO, MOSI and SCK pins are reserved for the ISP
+	connector.
+	
+	Pins RXD and TXD (PD0 and PD1) are used for UART communication with the
+	FT232 module. 12 of the remaining 17 pins are used for interacting with the
+	environment, 11 of which are configured as inputs.
+	
+	\includepdf[landscape]{img/schematic}
+	
+	\subsubsection{USB communication port and power source}
+	
+	Data transmission and power supply are done through the USB port placed on
+	top of the FT232 breakout board designated as ``EM212". This board houses
+	the chip itself as well as the noise filtering circuitry for both the power
+	and the data lines.
+	
+	The power line is stabilized with a combination of a 4.7 \textmu F
+	electrolytic capacitor and a 100 nF ceramic capacitor. This eliminates both
+	low and high-frequency noise from the line. A ferrite bead connected in
+	series with the line further reduces high-frequency noise.
+	
+	When operating as a USB to UART converter, the FT232 chip requires no
+	additional circuitry and may be directly connected to the TXD and RXD pins
+	of the microcontroller.
+	
+	\subsubsection{LED and phototransistor array}
+	
+	Due to insufficient voltage on the power rail, the light-emitting diodes
+	must be connected in parallel rather than in series. To distribute the
+	current evenly, each of the LEDs is given its own resistor. An additional
+	100 \textOmega {} resistor connected in series with the power rail is used
+	to adjust the brightness.
+	
+	The intensity of light reflected from the paper is probed using
+	phototransistors. Each transistor-resistor pair can be thought of as a
+	voltage divider of constant input and variable output. By default, in total
+	darkness, no current flows through the transistor and the voltage is pulled
+	high through the resistor. When the transistor is hit by light, current
+	starts flowing from the collector to the emitter and from there to ground,
+	reducing the voltage on the pin.
+	
+	Because of imperfections in the assembly process of the read head as well
+	as varying sensitivity of the transistors, each of the resistors is
+	fine-tuned to obtain a suitable intensity response characteristic. As a
+	result, the array may be used to drive the pins of the microcontroller
+	directly, without the need for amplification or analog-to-digital
+	conversion.
+	
+	\subsubsection{Roller motor}
+	
+	As the sole mechanical component of the device, the DC motor is responsible
+	for most of its power consumption. Consuming a current of up to 170 mA, the
+	motor is nonetheless within the limits imposed by the USB standard, which
+	mandates a maximum current of 500 mA. This does require the reader to be
+	configured as a ``high-power" device, which is handled by the FT232 chip.
+	
+	To prevent noise to the power rail, a 100 nF capacitor is placed across the
+	terminals of the motor. Power to the motor is controlled by a circuit
+	described in the next subsection.
+	
+	\subsubsection{Power switching circuit}
+	
+	To decrease power consumption and reduce wear on the rubber roller, power
+	to the read head is enabled on demand through an NPN power transistor.
+	When enabled, the transistor shunts the ground rail of the head with the
+	common ground.
+	
+	The base current is dictated by a 330 \textOmega {} resistor in series with
+	the base. At 15 mA, the current may be sourced directly from the
+	microcontroller without the need for a Darlington configuration.
+	
+	\subsubsection{User interface}
+	
+	Only two elements constitute the user interface: the power LED and the
+	emergency stop button.
+	
+	The power LED is permanently connected between the power rail and the
+	ground rail. Being a bright green LED, it only requires a 68 k\textOmega {}
+	resistor to emit a substantial amount of light.
+	
+	The emergency stop button is a momentary push switch that shunts the
+	emergency stop pin with the power rail. When the switch is not depressed,
+	the pin is pulled low through a 10 k\textOmega {} resistor.
 	
 \end{document}
