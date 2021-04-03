@@ -153,6 +153,7 @@
 	
 	\newpage
 	\subsubsection{Table of messages}
+	\label{sec:messages}
 	
 	\begin{center}
 	\begin{tabular}{ |c|c|p{7cm}|c| }
@@ -430,5 +431,83 @@
 	The emergency stop button is a momentary push switch that shunts the
 	emergency stop pin with the power rail. When the switch is not depressed,
 	the pin is pulled low through a 10 k\textOmega {} resistor.
+	
+	\newpage
+	\section{Firmware implementation}
+	
+	\subsection{Overview}
+	
+	To guarantee fluid operation and responsiveness of the physical and serial
+	interfaces, the firmware is largely asynchronous in nature. This means that
+	many operations are performed ``in the background" (through interrupts) and
+	the main subroutine is often reduced to merely coordinating the exchange of
+	data between interrupt handlers.
+	
+	That said, two major modes of operation may be discerned that were included
+	in the main flow of execution. Those are \textit{standby mode} and
+	\textit{session mode}. The device alternates between the two modes in
+	response to various signals, including messages, user interaction and
+	sensor input.
+	
+	Due to this asynchronicity, it is difficult to describe the entire
+	algorithm in a single flowchart. For that reason, the many independent
+	subroutines are grouped together by the context in which they are
+	presented. This, however, is not the only peculiarity of the system.
+	
+	The firmware employs a system-wide exception handling mechanism. Because
+	exceptions are a high-level concept, this feature is emulated by a global
+	error status register. ``Throwing an exception" is performed by writing a
+	non-zero value to this register.
+	
+	Any routine which calls an error-generating subroutine must check the error
+	register after it returns and abort execution if the error status is
+	non-zero. Any routine which stalls execution until a condition is met must
+	also simultaneously check the value of the error register.
+	
+	Because error-handling code largely disregards the ordinary flow of
+	execution while still being explicitly incorporated into the algorithm, the
+	symbols representing this code are printed in red for clarity.
+	
+	\subsection{Top-level loop and main subroutine}
+	
+	Before any meaningful activity may begin, the device must be properly
+	configured. This includes configuring the read head pin as an output,
+	adjusting the timer to fire once per millisecond, setting the UART
+	transciever to 9600 baud and enabling global interrupts.
+	
+	\begin{figure}[h]
+		\includegraphics[width=\linewidth]{img/main}
+		\caption{The top-level loop and the main subroutine.}
+	\end{figure}
+	\clearpage
+	
+	Following the configuration, the top-level loop begins. The inside of the
+	loop houses the global error handler and may be interpreted as a
+	``try-catch-finally" statement known from higher-level languages. First,
+	the main subroutine is called to perform its duties. Regardless of the
+	outcome, power to the read head is disabled once it returns. If an error
+	caused the main routine to abort, an error message is sent, the error
+	register is cleared and the loop reiterates.
+	
+	The main subroutine contains the entire algorithm for reading data tapes.
+	It begins by polling the serial interface for a start message (see
+	table~\ref{sec:messages}). Once received, the device responds with a
+	confirmation message and enables power to the read head. It is at this
+	point that the transition from standby mode to session mode occurs.
+	
+	With the LEDs powered on and the roller motor running, the initialization
+	process begins. The device waits a certain amount of time for the first
+	symbol to appear. If the initialization times out, the session is aborted.
+	
+	Once the first symbol has appeared, the length header (described in
+	section~\ref{sec:format}) is scanned. Upon completion, the newly discovered
+	length is queued for asynchronous transmission, which is depicted in the
+	diagram as a branch separating from the main flow. Following this, the
+	remaining bytes are also read and asynchronously transmitted.
+	
+	Finally, after all the bytes have been read, the device retains power to
+	the read head for a short amount of time to remove the paper tape from
+	under the roller. Once the timeout clears, a ``read finished" message is
+	sent and the device reenters standby mode.
 	
 \end{document}
